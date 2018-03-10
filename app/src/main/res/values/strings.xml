@@ -9,4 +9,6 @@
     <string name="here_to_chat">Here to chat</string>
     <string name="here_to_help">Here to help</string>
     <string name="send">Send</string>
+    <string name="help_question">HELP</string>
+    <string name="seek_question">HELP</string>
 </resources>

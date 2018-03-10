@@ -17,12 +17,17 @@ import studio.roboto.communimate.R
 import studio.roboto.communimate.util.HardCodedData
 import java.util.*
 import java.util.concurrent.TimeoutException
+import android.app.Activity
+import android.view.inputmethod.InputMethodManager
+import studio.roboto.communimate.util.DateUtil
+
 
 class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActionListener {
 
     private lateinit var mAdapter: ChatAdapter
     private lateinit var mLayoutManager: LinearLayoutManager
     private var mHandler: Handler = Handler()
+    private var mQuestionInputMode = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +59,9 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
         for (x in 0 until questions.size) {
             mHandler.postDelayed( {
                 mAdapter.add(questions[x])
+                if (x == questions.size - 1) {
+                    llButtons.visibility = View.VISIBLE
+                }
             }, ((x + 1) * 1000).toLong())
         }
     }
@@ -65,23 +73,37 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
     }
 
     private fun processInput(input: String) {
-        if (input == HardCodedData.EASTER_EGG || input.equals(HardCodedData.EASTER_EGG)) {
-            launchEasterEgg()
+        val egg: HardCodedData.EasterEgg? = HardCodedData.getEasterEggByPhrase(input)
+        if (egg != null) {
+            launchEasterEgg(egg)
         }
         else {
-            mAdapter.add(ChatModel.me(UUID.randomUUID().toString(), input, Date()))
-            etInput.setText("")
+            if (mQuestionInputMode) {
+                val input: String = etInput.text.toString()
+                Toast.makeText(this, "QUESTION INPUT", Toast.LENGTH_LONG).show()
+            }
+            else {
+                // Add to Firebase
+                mAdapter.add(ChatModel.me(UUID.randomUUID().toString(), input, Date()))
+                etInput.setText("")
+            }
         }
     }
 
-    private fun launchEasterEgg() {
-        Toast.makeText(this, "Easter Egg", Toast.LENGTH_LONG).show()
+    //region Easter Egg Functionality
+
+    private fun launchEasterEgg(egg: HardCodedData.EasterEgg) {
         HardCodedData.IS_EASTER_EGG_ENABLED = true
         mAdapter.notifyDataSetChanged()
-        animateBackgroundAndToolbar()
+        animateBackgroundAndToolbar(egg.backgroundColor)
+        launchScript(egg.messages)
+        hideKeyboard(this)
+        etInput.isEnabled = false
+        imgIcon.setBackgroundResource(egg.imageRes)
+        etInput.setText("")
     }
 
-    private fun animateBackgroundAndToolbar() {
+    private fun animateBackgroundAndToolbar(colour: Int) {
         object : Thread() {
             override fun run() {
                 val colorAnim = ArgbEvaluator()
@@ -92,8 +114,8 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
                     catch (e: TimeoutException) {
                         e.printStackTrace()
                     }
-                    val backgroundC: Int = colorAnim.evaluate(x.toFloat() / 100f, Color.WHITE, Color.BLACK) as Int
-                    val toolbarC: Int = colorAnim.evaluate(x.toFloat() / 100f, ContextCompat.getColor(applicationContext, R.color.colorPrimary), Color.BLACK) as Int
+                    val backgroundC: Int = colorAnim.evaluate(x.toFloat() / 100f, Color.WHITE, colour) as Int
+                    val toolbarC: Int = colorAnim.evaluate(x.toFloat() / 100f, ContextCompat.getColor(applicationContext, R.color.colorPrimary), colour) as Int
                     toolbarChat.setBackgroundColor(toolbarC)
                     rlBackground.setBackgroundColor(backgroundC)
                 }
@@ -104,17 +126,49 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
         }.start()
     }
 
+    private fun launchScript(msg: List<ChatModel>) {
+        object : Thread() {
+            override fun run() {
+                for (x in msg) {
+                    runOnUiThread {
+                        mAdapter.add(x)
+                    }
+                    try {
+                        Thread.sleep(2000)
+                    }
+                    catch (e: TimeoutException) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }.start()
+    }
+
+    //endregion
+
     //region Interface :- OnClickListener
 
     override fun onClick(v: View?) {
         when (v) {
             btnHelp -> {
-                Toast.makeText(this, "HELP CLICKED", Toast.LENGTH_LONG).show()
                 transitionToTextInput()
+                mAdapter.add(ChatModel.me("ID_HELP", getString(R.string.here_to_help), Date()))
+                mHandler.postDelayed({
+                    runOnUiThread {
+                        mAdapter.add(ChatModel.other("ID_HELP_1", getString(R.string.help_question), DateUtil.plusSecond(1)))
+                        mQuestionInputMode = true
+                    }
+                }, 500)
             }
             btnSeek -> {
-                Toast.makeText(this, "SEEK CLICKED", Toast.LENGTH_LONG).show()
                 transitionToTextInput()
+                mAdapter.add(ChatModel.me("ID_SEEK", getString(R.string.here_to_chat), Date()))
+                mHandler.postDelayed({
+                    runOnUiThread {
+                        mAdapter.add(ChatModel.other("ID_SEEK_1", getString(R.string.seek_question), DateUtil.plusSecond(1)))
+                        mQuestionInputMode = true
+                    }
+                }, 500)
             }
             btnSend -> {
                 processInput(etInput.text.toString())
@@ -135,4 +189,15 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
     }
 
     //endregion
+
+    companion object {
+        fun hideKeyboard(activity: Activity) {
+            val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            var view = activity.currentFocus
+            if (view == null) {
+                view = View(activity)
+            }
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
 }

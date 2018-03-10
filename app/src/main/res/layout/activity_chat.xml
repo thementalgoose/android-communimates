@@ -36,6 +36,7 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/llButtons"
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -66,6 +67,7 @@
         </LinearLayout>
 
         <RelativeLayout
+            android:visibility="gone"
             android:id="@+id/rlTextInput"
             android:layout_width="match_parent"
             android:layout_marginTop="8dp"
