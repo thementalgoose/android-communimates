@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "204451539121",
-    "firebase_url": "https://donny-roboto.firebaseio.com",
-    "project_id": "donny-roboto",
-    "storage_bucket": "donny-roboto.appspot.com"
+    "project_number": "736919118467",
+    "firebase_url": "https://roboto-communimate.firebaseio.com",
+    "project_id": "roboto-communimate",
+    "storage_bucket": "roboto-communimate.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:204451539121:android:5951c5b868633ddf",
+        "mobilesdk_app_id": "1:736919118467:android:1fcbd56794a937d1",
         "android_client_info": {
-          "package_name": "studio.roboto.donny"
+          "package_name": "roboto.studio.communimate"
         }
       },
       "oauth_client": [
         {
-          "client_id": "204451539121-0h2ollirb4vb9v522ce91uvqk6jngo78.apps.googleusercontent.com",
+          "client_id": "736919118467-80ri6ogjogit80gfp9o6b7kmikgmnhth.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC-6rSiMUMtUwE6QgKS5ljgNcZXoAyFHJg"
+          "current_key": "AIzaSyBOaIWuESYd-J7r13UCCFz4LTyZwpY0U2A"
         }
       ],
       "services": {
