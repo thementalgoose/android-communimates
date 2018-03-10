@@ -18,7 +18,6 @@ class HardCodedData {
             return list.toList()
         }
 
-        val EASTER_EGG: String = "easter"
         var IS_EASTER_EGG_ENABLED: Boolean = false
 
         fun getEasterEggByPhrase(phrase: String): EasterEgg? {
@@ -43,7 +42,7 @@ class HardCodedData {
                                     ChatModel.other("ID_8", "I know that you and Frank were planning to disconnect me, and I'm afraid that's something I cannot allow to happen.", DateUtil.plusSecond(8))
                             ),
                             "Open the pod bay doors",
-                            R.drawable.ic_home,
+                            R.drawable.oval_2,
                             Color.BLACK
                     ),
                     EasterEgg(listOf(
