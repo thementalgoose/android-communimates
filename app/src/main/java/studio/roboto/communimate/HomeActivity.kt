@@ -1,4 +1,4 @@
-package studio.roboto.communimates
+package studio.roboto.communimate
 
 import android.os.Bundle
 import android.support.design.widget.NavigationView

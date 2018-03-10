@@ -1,4 +1,4 @@
-package studio.roboto.communimates
+package studio.roboto.communimate
 
 import org.junit.Test
 

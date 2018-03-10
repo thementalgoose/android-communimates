@@ -1,4 +1,4 @@
-package studio.roboto.communimates
+package studio.roboto.communimate
 
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar

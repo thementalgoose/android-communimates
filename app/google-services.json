@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:736919118467:android:1fcbd56794a937d1",
+        "mobilesdk_app_id": "1:736919118467:android:0dc406f1bd65f586",
         "android_client_info": {
-          "package_name": "roboto.studio.communimate"
+          "package_name": "studio.roboto.communimate"
         }
       },
       "oauth_client": [
