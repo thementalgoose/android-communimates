@@ -3,4 +3,8 @@
     <color name="colorPrimary">#8E24AA</color>
     <color name="colorPrimaryDark">#6A1B9A</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="chat_bubble_other">#ff0068</color>
+    <color name="chat_bubble_me">#eeeef2</color>
+    <color name="white">#ffffff</color>
 </resources>
