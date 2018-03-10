@@ -1,5 +1,6 @@
 package studio.roboto.communimate.chat
 
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,7 +8,7 @@ import studio.roboto.communimate.R
 import studio.roboto.communimate.util.SortedListAdapter
 import studio.roboto.communimate.util.SortedListComparator
 
-class ChatAdapter: SortedListAdapter<ChatModel, ChatViewHolder>(ChatModel::class.java, ChatComparator()) {
+class ChatAdapter(val rv: RecyclerView): SortedListAdapter<ChatModel, ChatViewHolder>(ChatModel::class.java, ChatComparator()) {
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int, item: ChatModel) {
         holder.bind(item)
@@ -31,4 +32,9 @@ class ChatAdapter: SortedListAdapter<ChatModel, ChatViewHolder>(ChatModel::class
     }
 
     //endregion
+
+    override fun add(model: ChatModel) {
+        super.add(model)
+        rv.smoothScrollToPosition(itemCount)
+    }
 }

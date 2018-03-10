@@ -9,5 +9,9 @@ class DateUtil {
         fun from(format: String): Date {
             return mSDF.parse(format)
         }
+
+        fun plusSecond(sec: Int): Date {
+            return Date(System.currentTimeMillis() + sec)
+        }
     }
 }

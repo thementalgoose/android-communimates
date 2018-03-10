@@ -7,4 +7,6 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="chat_radius">8dp</dimen>
+    <dimen name="input_height">48dp</dimen>
+    <dimen name="input_height_buttons">64dp</dimen>
 </resources>

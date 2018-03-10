@@ -2,4 +2,11 @@
     <string name="app_name">CommuniMate</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="wave">👋</string>
+    <string name="chat_msg_1">Hey how\'s it going?</string>
+    <string name="chat_msg_2">Would you like to chat to somebody, or are you here to help?</string>
+    <string name="here_to_chat">Here to chat</string>
+    <string name="here_to_help">Here to help</string>
+    <string name="send">Send</string>
 </resources>

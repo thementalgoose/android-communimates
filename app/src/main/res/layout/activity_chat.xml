@@ -1,14 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/rlBackground"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/toolbar"
-        android:id="@+id/toolbar" />
+    <RelativeLayout
+        android:background="@color/colorPrimary"
+        android:id="@+id/toolbarChat"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+
+        <ImageView
+            app:srcCompat="@drawable/ic_home"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="16dp"
+            android:layout_width="32dp"
+            android:layout_centerVertical="true"
+            android:layout_height="32dp" />
+
+        <ImageView
+            android:layout_centerInParent="true"
+            android:id="@+id/imgIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:id="@+id/llBottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/llButtons"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_height_buttons">
+
+            <Button
+                android:text="@string/here_to_help"
+                android:textAllCaps="false"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="1"
+                android:id="@+id/btnHelp"
+                android:layout_marginBottom="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <Button
+                android:text="@string/here_to_chat"
+                android:textAllCaps="false"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:id="@+id/btnSeek"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlTextInput"
+            android:layout_width="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_height="@dimen/input_height">
+
+            <ImageButton
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:textAllCaps="false"
+                android:id="@+id/btnSend"
+                app:srcCompat="@drawable/ic_send"
+                android:background="@drawable/circle"
+                android:layout_width="48dp"
+                android:layout_height="48dp" />
+
+            <EditText
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/input_rounded_box"
+                android:gravity="start|center_vertical"
+                android:maxLines="1"
+                android:imeOptions="actionDone"
+                android:id="@+id/etInput"
+                android:layout_marginEnd="16dp"
+                android:inputType="textShortMessage"
+                android:layout_alignTop="@id/btnSend"
+                android:layout_alignBottom="@id/btnSend"
+                android:layout_width="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/btnSend"
+                android:layout_height="match_parent" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvMain"
         android:layout_width="match_parent"
+        android:layout_below="@id/toolbarChat"
+        android:layout_above="@id/llBottom"
         android:layout_height="match_parent" />
 
-</LinearLayout>
+</RelativeLayout>

@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#8E24AA</color>
-    <color name="colorPrimaryDark">#6A1B9A</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#2e294e</color>
+    <color name="colorPrimaryDark">#1e193e</color>
+    <color name="colorAccent">#2e294e</color>
 
     <color name="chat_bubble_other">#ff0068</color>
-    <color name="chat_bubble_me">#eeeef2</color>
+    <color name="chat_bubble_me">#6c6ea0</color>
     <color name="white">#ffffff</color>
+    <color name="input_gray">#eeeef2</color>
+    <color name="chat_bubble_me_easter">#6c6ea0</color>
+    <color name="chat_bubble_other_easter">#ff0000</color>
 </resources>

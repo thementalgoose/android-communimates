@@ -79,19 +79,19 @@ abstract class SortedListAdapter<E, T : RecyclerView.ViewHolder>: RecyclerView.A
 
     //region Add / Remove methods
 
-    fun add(model: E) {
+    open fun add(model: E) {
         mSortedList.add(model)
     }
 
-    fun remove(model: E) {
+    open fun remove(model: E) {
         mSortedList.remove(model)
     }
 
-    fun add(models: List<E>) {
+    open fun add(models: List<E>) {
         mSortedList.addAll(models)
     }
 
-    fun remove(models: List<E>) {
+    open fun remove(models: List<E>) {
         mSortedList.beginBatchedUpdates()
         for (model in models) {
             mSortedList.remove(model)
@@ -99,7 +99,7 @@ abstract class SortedListAdapter<E, T : RecyclerView.ViewHolder>: RecyclerView.A
         mSortedList.endBatchedUpdates()
     }
 
-    fun removeAll() {
+    open fun removeAll() {
         if (mSortedList.size() > 0) {
             mSortedList.beginBatchedUpdates()
             for (i in mSortedList.size() - 1..0) {
@@ -109,7 +109,7 @@ abstract class SortedListAdapter<E, T : RecyclerView.ViewHolder>: RecyclerView.A
         }
     }
 
-    fun replace(model: E) {
+    open fun replace(model: E) {
         mSortedList.beginBatchedUpdates()
         for (i in mSortedList.size() - 1 downTo 0) {
             val mod = mSortedList.get(i)
@@ -121,7 +121,7 @@ abstract class SortedListAdapter<E, T : RecyclerView.ViewHolder>: RecyclerView.A
         mSortedList.endBatchedUpdates()
     }
 
-    fun replaceAll(models: List<E>) {
+    open fun replaceAll(models: List<E>) {
         mSortedList.beginBatchedUpdates()
         for (i in mSortedList.size() - 1 downTo 0) {
             val model = mSortedList.get(i)
