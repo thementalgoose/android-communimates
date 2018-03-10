@@ -1,4 +1,4 @@
-package studio.roboto.donny
+package studio.roboto.communimates
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
