@@ -20,6 +20,7 @@ import java.util.concurrent.TimeoutException
 import android.app.Activity
 import android.view.inputmethod.InputMethodManager
 import studio.roboto.communimate.util.DateUtil
+import studio.roboto.communimate.util.GenUtils
 
 
 class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActionListener {
@@ -81,6 +82,7 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
             if (mQuestionInputMode) {
                 val input: String = etInput.text.toString()
                 Toast.makeText(this, "QUESTION INPUT", Toast.LENGTH_LONG).show()
+                addLoadingChatMessage()
             }
             else {
                 // Add to Firebase
@@ -88,6 +90,13 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
                 etInput.setText("")
             }
         }
+    }
+
+    private fun addLoadingChatMessage() {
+        val msg: ChatModel = ChatModel.other("LOADING_DESC", getString(R.string.please_wait_finding_chat_partner), Date())
+        mAdapter.add(msg)
+        val model: ChatModel = ChatModel.other("LOADING_DIALOG_" + GenUtils.getUniqueId(this), "MSG", DateUtil.plusSecond(1))
+        mAdapter.add(model)
     }
 
     //region Easter Egg Functionality
@@ -152,20 +161,20 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
         when (v) {
             btnHelp -> {
                 transitionToTextInput()
-                mAdapter.add(ChatModel.me("ID_HELP", getString(R.string.here_to_help), Date()))
+                mAdapter.add(ChatModel.me("ID_SEEK", getString(R.string.here_to_help), Date()))
                 mHandler.postDelayed({
                     runOnUiThread {
-                        mAdapter.add(ChatModel.other("ID_HELP_1", getString(R.string.help_question), DateUtil.plusSecond(1)))
+                        mAdapter.add(ChatModel.other("ID_SEEK_1", getString(R.string.seek_question), DateUtil.plusSecond(1)))
                         mQuestionInputMode = true
                     }
                 }, 500)
             }
             btnSeek -> {
                 transitionToTextInput()
-                mAdapter.add(ChatModel.me("ID_SEEK", getString(R.string.here_to_chat), Date()))
+                mAdapter.add(ChatModel.me("ID_HELP", getString(R.string.here_to_chat), Date()))
                 mHandler.postDelayed({
                     runOnUiThread {
-                        mAdapter.add(ChatModel.other("ID_SEEK_1", getString(R.string.seek_question), DateUtil.plusSecond(1)))
+                        mAdapter.add(ChatModel.other("ID_HELP_1", getString(R.string.help_question), DateUtil.plusSecond(1)))
                         mQuestionInputMode = true
                     }
                 }, 500)

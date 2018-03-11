@@ -7,7 +7,11 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import studio.roboto.communimate.chat.ChatActivity
 
+<<<<<<< HEAD
+class SplashActivity : AppCompatActivity(), Runnable {
+=======
 class SplashActivity: BaseActivity(), Runnable {
+>>>>>>> 6a577c19cc2d41cb3eb01f7fb094b6cca72815fd
 
     private val handler = Handler()
 
@@ -15,6 +19,7 @@ class SplashActivity: BaseActivity(), Runnable {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
+<<<<<<< HEAD
         // Careful when you uncomment this
         //        for (i in 1..100) {
         //            InsertHelperEntityTask(object : InsertHelperEntityTask.InsertHelperEntityTaskListener {
@@ -65,8 +70,9 @@ class SplashActivity: BaseActivity(), Runnable {
         //                    override fun onFailure(call: Call<SearchResponseModel>?, t: Throwable?) {
         //                    }
         //                })
-
+=======
         setStatusBarColor(ContextCompat.getColor(this, R.color.chat_bubble_other))
+>>>>>>> 6a577c19cc2d41cb3eb01f7fb094b6cca72815fd
     }
 
     override fun onResume() {
