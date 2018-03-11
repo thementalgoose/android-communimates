@@ -1,35 +1,72 @@
 package studio.roboto.communimate.firebase
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import studio.roboto.communimate.firebase.models.FBConversation
 import studio.roboto.communimate.firebase.models.FBRawMessage
+import studio.roboto.communimate.util.GenUtils
+import java.util.*
 
 class FirebaseHandler {
     companion object {
 
         //region Utility Method
 
-        fun getAuth(): FirebaseUser {
+        fun getAuth(done: () -> Unit) {
             val auth: FirebaseAuth = FirebaseAuth.getInstance()
             if (auth.currentUser == null) {
-                auth.signInAnonymously()
+                auth.signInAnonymously().addOnCompleteListener { task ->
+                    println(task.exception)
+                    println("Task is successful: " + task.isSuccessful)
+                    println("Task::: BOOM " + task.isComplete)
+                    if (task.isSuccessful) {
+                        done()
+                    }
+                    else {
+                        println("ERROR!")
+                    }
+                }
             }
-            return auth.currentUser!!
+            else {
+                done()
+            }
         }
 
-        fun getDB(): FirebaseDatabase {
-            val user: FirebaseUser = getAuth()
-            return FirebaseDatabase.getInstance()
+        fun getDB(done: (db: FirebaseDatabase) -> Unit) {
+            getAuth {
+                done(FirebaseDatabase.getInstance())
+            }
+        }
+
+        fun getDBUsers(done: (db: DatabaseReference) -> Unit) {
+            getAuth {
+                done(FirebaseDatabase.getInstance().getReference("users"))
+            }
+        }
+
+        fun getDBConvos(done: (db: DatabaseReference) -> Unit) {
+            getAuth {
+                done(FirebaseDatabase.getInstance().getReference("conversations"))
+            }
+        }
+
+        fun getMyUserId(context: Context): String {
+            var uid: String? = GenUtils.getSP(context).getString("USERNAME", null)
+            if (uid == null) {
+                uid = UUID.randomUUID().toString()
+                GenUtils.getSP(context).edit().putString("USERNAME", uid).apply()
+                getDBUsers {
+                    it.child(uid).child("registered").setValue(true)
+                }
+            }
+            return uid
         }
 
         //endregion
 
-        fun listenForMessages(conversationId: String, listener: MessageListener): FirebasePairChild {
+        fun listenForMessages(conversationId: String, listener: MessageListener) {
             val eventListener: ChildEventListener = object : ChildEventListener {
                 override fun onCancelled(p0: DatabaseError?) { /* DO NOTHING */ }
 
@@ -41,7 +78,7 @@ class FirebaseHandler {
                     p0?.let {
                         val msg: FBRawMessage? = it.getValue(FBRawMessage::class.java)
                         if (msg != null) {
-                            listener.messageAdded(msg)
+                            listener.messageAdded(it.key, msg)
                         }
                     }
                 }
@@ -50,17 +87,48 @@ class FirebaseHandler {
                     p0?.let {
                         val msg: FBRawMessage? = it.getValue(FBRawMessage::class.java)
                         if (msg != null) {
-                            listener.messageDeleted(msg)
+                            listener.messageDeleted(it.key, msg)
                         }
                     }
                 }
 
             }
-            val ref = getDB().getReference("conversations")
-                    .child(conversationId)
-                    .child("messages")
-            ref.addChildEventListener(eventListener)
-            return FirebasePairChild(ref, eventListener)
+            getDBConvos { it ->
+                val ref = it.child(conversationId)
+                        .child("messages")
+                ref.addChildEventListener(eventListener)
+                listener.refs(ref, eventListener, null)
+            }
+        }
+
+        fun waitForConversationPairing(context: Context, conversationId: String, listener: MessageListener) {
+            getDBUsers {
+                var firstSync: Boolean = false
+                val now: Long = System.currentTimeMillis()
+                val mUserId: String = getMyUserId(context)
+                it.child(mUserId).child("conversations").addValueEventListener(object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError?) {
+
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot?) {
+                        if (!firstSync) {
+                            firstSync = true
+                        }
+                        else {
+                            p0?.let {
+                                for (x in it.children) {
+                                    if (x.getValue(Long::class.java)!! > now) {
+                                        // This one!
+                                        println("Conversation ID found: " + x.key)
+                                        listenForMessages(conversationId, listener)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            }
         }
 
         //region Clean Up for Firebase Listeners
@@ -78,8 +146,9 @@ class FirebaseHandler {
         //region Interface Declaration :- Message listener
 
         interface MessageListener {
-            fun messageAdded(msg: FBRawMessage)
-            fun messageDeleted(msg: FBRawMessage)
+            fun messageAdded(msgKey: String, msg: FBRawMessage)
+            fun messageDeleted(msgKey: String, msg: FBRawMessage)
+            fun refs(ref: DatabaseReference, listChild: ChildEventListener?, listEvent: ValueEventListener?)
         }
 
         //endregion

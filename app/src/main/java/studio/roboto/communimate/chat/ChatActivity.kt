@@ -19,6 +19,13 @@ import java.util.*
 import java.util.concurrent.TimeoutException
 import android.app.Activity
 import android.view.inputmethod.InputMethodManager
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import studio.roboto.communimate.firebase.FirebaseHandler
+import studio.roboto.communimate.firebase.FirebasePairChild
+import studio.roboto.communimate.firebase.FirebasePairValue
+import studio.roboto.communimate.firebase.models.FBRawMessage
 import studio.roboto.communimate.util.DateUtil
 import studio.roboto.communimate.util.GenUtils
 
@@ -29,6 +36,9 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
     private lateinit var mLayoutManager: LinearLayoutManager
     private var mHandler: Handler = Handler()
     private var mQuestionInputMode = true
+    private var mIsSeeker: Boolean? = null
+
+    private var mPair: MutableList<FirebasePairChild> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,8 +96,29 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
             }
             else {
                 // Add to Firebase
-                mAdapter.add(ChatModel.me(UUID.randomUUID().toString(), input, Date()))
+                val input = etInput.text.toString()
+                btnSend.isEnabled = false
+                etInput.isEnabled = false
                 etInput.setText("")
+                mConversationId?.let {
+                    val mUUID: String = FirebaseHandler.getMyUserId(applicationContext)
+                    val msg: FBRawMessage = FBRawMessage(System.currentTimeMillis(), input, mUUID)
+                    FirebaseHandler.getDBConvos { ref ->
+                        ref.child(it)
+                                .child("messages")
+                                .push().setValue(msg).addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                etInput.isEnabled = true
+                                btnSend.isEnabled = true
+                            } else {
+                                etInput.isEnabled = true
+                                btnSend.isEnabled = true
+                                etInput.setText(input)
+                                Toast.makeText(applicationContext, "Error sending your message at this time", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -97,7 +128,83 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
         mAdapter.add(msg)
         val model: ChatModel = ChatModel.other("LOADING_DIALOG_" + GenUtils.getUniqueId(this), "MSG", DateUtil.plusSecond(1))
         mAdapter.add(model)
+        mQuestionInputMode = false
+
+        configureChat("TEST_USER_ID")
     }
+
+    private fun isSeeker(): Boolean? {
+        return mIsSeeker
+    }
+    private fun isHelper(): Boolean? {
+        if (mIsSeeker == null) {
+            return mIsSeeker
+        }
+        else {
+            return !mIsSeeker!!
+        }
+    }
+
+    //region Chat Functionality
+
+    /**
+     * Method called when you're a seeker in the app
+     * - HelperId will be the user ID of the person you need to talk too
+     * - Push a generated conversation ID underneath my UID node, and their UID node
+     * - Helper will be listening for changes to that node, will get the firebase auto push
+     * - Seeker and Helper will then both have conversation IDs and can listen underneath the node
+     *
+     * Again. Called as a SEEKER
+     */
+    private var mConversationId: String? = null
+    private fun configureChat(helpersId: String) {
+        // Generate a conversation UUID and get my ID
+        mConversationId = UUID.randomUUID().toString()
+        val myUserId: String = FirebaseHandler.getMyUserId(this)
+
+        // Generate Conversation node
+        FirebaseHandler.getDBConvos {
+            it.child(mConversationId).child("users").child(helpersId).setValue(true)
+            it.child(mConversationId).child("users").child(myUserId).setValue(true)
+        }
+
+        // Push this under both our user IDs
+        FirebaseHandler.getDBUsers {
+            it.child(myUserId).child("conversations").child(mConversationId).setValue(System.currentTimeMillis())
+            it.child(helpersId).child("conversations").child(mConversationId).setValue(System.currentTimeMillis())
+        }
+
+        // Listen for all the messages
+        FirebaseHandler.listenForMessages(mConversationId!!, object : FirebaseHandler.Companion.MessageListener {
+            override fun refs(ref: DatabaseReference, listChild: ChildEventListener?, listEvent: ValueEventListener?) {
+                listChild?.let {
+                    mPair.add(FirebasePairChild(ref, it))
+                }
+            }
+
+            override fun messageAdded(msgKey: String, msg: FBRawMessage) {
+                mAdapter.add(msg.convertToMsgObject(msgKey, applicationContext))
+            }
+
+            override fun messageDeleted(msgKey: String, msg: FBRawMessage) {
+                mAdapter.remove(msg.convertToMsgObject(msgKey, applicationContext))
+            }
+        })
+
+        // Push my message to Firebase
+        etInput.isEnabled = true
+        btnSend.isEnabled = true
+        etInput.setText("")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        for (x in mPair) {
+            FirebaseHandler.cleanUp(x)
+        }
+    }
+
+    //endregion
 
     //region Easter Egg Functionality
 
