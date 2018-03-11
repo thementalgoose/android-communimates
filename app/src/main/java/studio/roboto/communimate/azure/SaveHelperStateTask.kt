@@ -7,6 +7,7 @@ import retrofit2.Response
 import studio.roboto.communimate.azure.azure_entities.HelperEntity
 import studio.roboto.communimate.azure.retrofit_models.requests.KeyPhrasesRequestModel
 import studio.roboto.communimate.azure.retrofit_models.responses.KeyPhrasesResponseModel
+import studio.roboto.communimate.util.HardCodedData
 
 class SaveHelperStateTask : AsyncTask<Unit, Unit, Unit> {
 
@@ -20,10 +21,17 @@ class SaveHelperStateTask : AsyncTask<Unit, Unit, Unit> {
         this.helperUserId = helperUserId
         this.helperUserPhrase = helperUserPhrase
         this.listener = listener
+
+
     }
 
     override fun doInBackground(vararg p0: Unit?) {
-        saveHelperState(helperUserId, helperUserPhrase)
+        if (!HardCodedData.USE_HARD_CODED_VALUES)  {
+            saveHelperState(helperUserId, helperUserPhrase)
+        }
+        else {
+            isSuccess = true
+        }
     }
 
     override fun onPostExecute(result: Unit?) {

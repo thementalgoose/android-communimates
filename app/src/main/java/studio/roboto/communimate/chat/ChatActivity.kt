@@ -40,7 +40,6 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
     private lateinit var mLayoutManager: LinearLayoutManager
     private var mHandler: Handler = Handler()
     private var mQuestionInputMode = true
-    private var mIsSeeker: Boolean? = null
 
     private var mPair: MutableList<FirebasePairChild> = mutableListOf()
 
@@ -151,6 +150,10 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
         if (isHelper()!!) {
             etInput.setText("")
             FirebaseHandler.waitForConversationPairing(this, object : FirebaseHandler.Companion.MessageListener {
+                override fun conversationIdFound(convoId: String) {
+                    mConversationId = convoId
+                }
+
                 override fun messageAdded(msgKey: String, msg: FBRawMessage) {
                     mAdapter.add(msg.convertToMsgObject(msgKey, applicationContext))
                 }
@@ -225,6 +228,10 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
 
         // Listen for all the messages
         FirebaseHandler.listenForMessages(mConversationId!!, object : FirebaseHandler.Companion.MessageListener {
+            override fun conversationIdFound(convoId: String) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
             override fun refs(ref: DatabaseReference, listChild: ChildEventListener?, listEvent: ValueEventListener?) {
                 listChild?.let {
                     mPair.add(FirebasePairChild(ref, it))
@@ -366,5 +373,7 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
             }
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
+
+        var mIsSeeker: Boolean? = null
     }
 }

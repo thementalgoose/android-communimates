@@ -7,6 +7,7 @@ import retrofit2.Response
 import studio.roboto.communimate.azure.retrofit_models.requests.KeyPhrasesRequestModel
 import studio.roboto.communimate.azure.retrofit_models.responses.KeyPhrasesResponseModel
 import studio.roboto.communimate.azure.retrofit_models.responses.SearchResponseModel
+import studio.roboto.communimate.util.HardCodedData
 
 class FindMatchForSeekerTask : AsyncTask<Unit, Unit, Unit> {
 
@@ -21,8 +22,12 @@ class FindMatchForSeekerTask : AsyncTask<Unit, Unit, Unit> {
     }
 
     override fun doInBackground(vararg p0: Unit?) {
-
-        getSeekerPhraseKeywords(seekerPhrase)
+        if (HardCodedData.USE_HARD_CODED_VALUES) {
+            helperUserId = HardCodedData.HARD_CODED_HELPER_ID
+        }
+        else {
+            getSeekerPhraseKeywords(seekerPhrase)
+        }
     }
 
     override fun onPostExecute(result: Unit?) {

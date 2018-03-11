@@ -20,6 +20,10 @@ class HardCodedData {
 
         var IS_EASTER_EGG_ENABLED: Boolean = false
 
+        var HARD_CODED_SEEKER_ID: String = "TEST_SEEKER_1"
+        var HARD_CODED_HELPER_ID: String = "TEST_HELPER_1"
+        var USE_HARD_CODED_VALUES: Boolean = true
+
         fun getEasterEggByPhrase(phrase: String): EasterEgg? {
             for (x in allEasterEggs()) {
                 if (x.recognitionPhrase == phrase || x.recognitionPhrase.equals(phrase)) {

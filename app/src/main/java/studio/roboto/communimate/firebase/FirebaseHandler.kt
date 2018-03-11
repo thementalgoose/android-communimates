@@ -4,9 +4,11 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import studio.roboto.communimate.chat.ChatActivity
 import studio.roboto.communimate.firebase.models.FBConversation
 import studio.roboto.communimate.firebase.models.FBRawMessage
 import studio.roboto.communimate.util.GenUtils
+import studio.roboto.communimate.util.HardCodedData
 import java.util.*
 
 class FirebaseHandler {
@@ -54,6 +56,14 @@ class FirebaseHandler {
 
         fun getMyUserId(context: Context): String {
             var uid: String? = GenUtils.getSP(context).getString("USERNAME", null)
+            if (HardCodedData.USE_HARD_CODED_VALUES) {
+                if (ChatActivity.mIsSeeker!!) {
+                    uid = HardCodedData.HARD_CODED_SEEKER_ID
+                }
+                else {
+                    uid = HardCodedData.HARD_CODED_HELPER_ID
+                }
+            }
             if (uid == null) {
                 uid = UUID.randomUUID().toString()
                 GenUtils.getSP(context).edit().putString("USERNAME", uid).apply()
@@ -91,7 +101,6 @@ class FirebaseHandler {
                         }
                     }
                 }
-
             }
             getDBConvos { it ->
                 val ref = it.child(conversationId)
@@ -106,6 +115,7 @@ class FirebaseHandler {
                 var firstSync: Boolean = false
                 val now: Long = System.currentTimeMillis()
                 val mUserId: String = getMyUserId(context)
+                println("listening on users/$mUserId/conversations")
                 it.child(mUserId).child("conversations").addValueEventListener(object : ValueEventListener {
                     override fun onCancelled(p0: DatabaseError?) {
 
@@ -116,11 +126,17 @@ class FirebaseHandler {
 //                            firstSync = true
 //                        }
 //                        else {
+                        println("DATA SNAPSHOT CHANGE!")
                             p0?.let {
                                 for (x in it.children) {
+                                    println("PROCESSING ${x.key} -> ${x.getValue(Long::class.java)} ( Ref time: $now")
                                     if (x.getValue(Long::class.java)!! > now) {
                                         // This one!
                                         println("Conversation ID found: " + x.key)
+                                        listener.conversationIdFound(x.key)
+                                        getDBConvos {
+                                            it.child(x.key).child("messages").push().setValue(FBRawMessage(System.currentTimeMillis(), "You've been matched! You can start talking now", "TEST_ID"))
+                                        }
                                         listenForMessages(x.key, listener)
                                     }
                                 }
@@ -149,6 +165,7 @@ class FirebaseHandler {
             fun messageAdded(msgKey: String, msg: FBRawMessage)
             fun messageDeleted(msgKey: String, msg: FBRawMessage)
             fun refs(ref: DatabaseReference, listChild: ChildEventListener?, listEvent: ValueEventListener?)
+            fun conversationIdFound(convoId: String)
         }
 
         //endregion
