@@ -24,6 +24,10 @@ abstract class BaseActivity: AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+
+    }
+
     fun setStatusBarColor(@ColorInt colour: Int) {
         // clear FLAG_TRANSLUCENT_STATUS flag:
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
