@@ -6,6 +6,8 @@ import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import studio.roboto.communimate.azure.interfaces.IKeyPhrasesAPI
+import studio.roboto.communimate.azure.interfaces.ISearchAPI
 import java.util.concurrent.TimeUnit
 
 class WebAPI {

@@ -1,4 +1,4 @@
-package studio.roboto.communimate.azure
+package studio.roboto.communimate.azure.interfaces
 
 import retrofit2.Call
 import retrofit2.http.GET
