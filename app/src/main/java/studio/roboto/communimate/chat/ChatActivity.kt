@@ -21,7 +21,10 @@ import android.app.Activity
 import android.view.inputmethod.InputMethodManager
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.internal.FirebaseAppHelper
+import studio.roboto.communimate.azure.SaveHelperStateTask
 import studio.roboto.communimate.firebase.FirebaseHandler
 import studio.roboto.communimate.firebase.FirebasePairChild
 import studio.roboto.communimate.firebase.FirebasePairValue
@@ -90,8 +93,22 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
         }
         else {
             if (mQuestionInputMode) {
-                val input: String = etInput.text.toString()
-                Toast.makeText(this, "QUESTION INPUT", Toast.LENGTH_LONG).show()
+                if (isHelper() != null && isHelper()!!) {
+                    val userId: String = FirebaseHandler.getMyUserId(this)
+                    val phrase: String = etInput.text.toString()
+                    SaveHelperStateTask(userId, phrase, object : SaveHelperStateTask.SaveHelperStateTaskListener {
+                        override fun success() {
+                            addLoadingChatMessage()
+                        }
+
+                        override fun failure() {
+
+                        }
+                    })
+                }
+                else if (isSeeker() != null && isSeeker()!!) {
+
+                }
                 addLoadingChatMessage()
             }
             else {
@@ -129,8 +146,24 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
         val model: ChatModel = ChatModel.other("LOADING_DIALOG_" + GenUtils.getUniqueId(this), "MSG", DateUtil.plusSecond(1))
         mAdapter.add(model)
         mQuestionInputMode = false
+        if (isHelper()!!) {
+            FirebaseHandler.waitForConversationPairing(this, object : FirebaseHandler.Companion.MessageListener {
+                override fun messageAdded(msgKey: String, msg: FBRawMessage) {
+                    mAdapter.add(msg.convertToMsgObject(msgKey, applicationContext))
+                }
 
-        configureChat("TEST_USER_ID")
+                override fun messageDeleted(msgKey: String, msg: FBRawMessage) {
+                    mAdapter.remove(msg.convertToMsgObject(msgKey, applicationContext))
+                }
+
+                override fun refs(ref: DatabaseReference, listChild: ChildEventListener?, listEvent: ValueEventListener?) {
+                    /* SHOULD NEVER BE CALLED IN THIS CONTEXT */
+                }
+            })
+        }
+        else {
+            
+        }
     }
 
     private fun isSeeker(): Boolean? {

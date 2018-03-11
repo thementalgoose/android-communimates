@@ -101,7 +101,7 @@ class FirebaseHandler {
             }
         }
 
-        fun waitForConversationPairing(context: Context, conversationId: String, listener: MessageListener) {
+        fun waitForConversationPairing(context: Context, listener: MessageListener) {
             getDBUsers {
                 var firstSync: Boolean = false
                 val now: Long = System.currentTimeMillis()
@@ -121,7 +121,7 @@ class FirebaseHandler {
                                     if (x.getValue(Long::class.java)!! > now) {
                                         // This one!
                                         println("Conversation ID found: " + x.key)
-                                        listenForMessages(conversationId, listener)
+                                        listenForMessages(x.key, listener)
                                     }
                                 }
                             }
