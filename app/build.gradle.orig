@@ -44,15 +44,17 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile "io.reactivex.rxjava2:rxandroid:2.0.1"
 
+<<<<<<< HEAD
     // Azure
     compile 'com.microsoft.azure.android:azure-storage-android:2.0.0@aar'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.4'
 
     // Logging
     implementation 'com.jakewharton.timber:timber:4.6.1'
-
+=======
     // Lottie
     compile 'com.airbnb.android:lottie:2.5.0'
+>>>>>>> 6a577c19cc2d41cb3eb01f7fb094b6cca72815fd
 }
 
 apply plugin: 'com.google.gms.google-services'
