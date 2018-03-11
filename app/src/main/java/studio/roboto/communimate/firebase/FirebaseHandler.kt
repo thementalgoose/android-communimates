@@ -112,10 +112,10 @@ class FirebaseHandler {
                     }
 
                     override fun onDataChange(p0: DataSnapshot?) {
-                        if (!firstSync) {
-                            firstSync = true
-                        }
-                        else {
+//                        if (!firstSync) {
+//                            firstSync = true
+//                        }
+//                        else {
                             p0?.let {
                                 for (x in it.children) {
                                     if (x.getValue(Long::class.java)!! > now) {
@@ -125,7 +125,7 @@ class FirebaseHandler {
                                     }
                                 }
                             }
-                        }
+//                        }
                     }
                 })
             }

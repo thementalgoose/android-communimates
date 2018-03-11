@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.internal.FirebaseAppHelper
+import studio.roboto.communimate.azure.FindMatchForSeekerTask
 import studio.roboto.communimate.azure.SaveHelperStateTask
 import studio.roboto.communimate.firebase.FirebaseHandler
 import studio.roboto.communimate.firebase.FirebasePairChild
@@ -104,12 +105,11 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
                         override fun failure() {
 
                         }
-                    })
+                    }).execute()
                 }
                 else if (isSeeker() != null && isSeeker()!!) {
-
+                    addLoadingChatMessage()
                 }
-                addLoadingChatMessage()
             }
             else {
                 // Add to Firebase
@@ -141,12 +141,15 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
     }
 
     private fun addLoadingChatMessage() {
-        val msg: ChatModel = ChatModel.other("LOADING_DESC", getString(R.string.please_wait_finding_chat_partner), Date())
+        val yourMsg: ChatModel = ChatModel.me("LOADING_DESC_ME", etInput.text.toString(), Date())
+        mAdapter.add(yourMsg)
+        val msg: ChatModel = ChatModel.other("LOADING_DESC", getString(R.string.please_wait_finding_chat_partner), DateUtil.plusSecond(1))
         mAdapter.add(msg)
-        val model: ChatModel = ChatModel.other("LOADING_DIALOG_" + GenUtils.getUniqueId(this), "MSG", DateUtil.plusSecond(1))
+        val model: ChatModel = ChatModel.other("LOADING_DIALOG_" + GenUtils.getUniqueId(this), "MSG", DateUtil.plusSecond(2))
         mAdapter.add(model)
         mQuestionInputMode = false
         if (isHelper()!!) {
+            etInput.setText("")
             FirebaseHandler.waitForConversationPairing(this, object : FirebaseHandler.Companion.MessageListener {
                 override fun messageAdded(msgKey: String, msg: FBRawMessage) {
                     mAdapter.add(msg.convertToMsgObject(msgKey, applicationContext))
@@ -161,8 +164,21 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
                 }
             })
         }
-        else {
-            
+        else if (isSeeker()!!) {
+            FindMatchForSeekerTask(etInput.text.toString(), object : FindMatchForSeekerTask.FindMatchForSeekerTaskListener {
+                override fun success(helperUserId: String?) {
+                    if (helperUserId == null) {
+                        mAdapter.add(ChatModel.other("COULDN'T_FIND_" + GenUtils.getUniqueId(applicationContext), "We couldn't match you to anyone at this time", Date()))
+                    }
+                    else {
+                        configureChat(helperUserId)
+                    }
+                }
+
+                override fun failure() {
+
+                }
+            }).execute()
         }
     }
 
@@ -300,21 +316,23 @@ class ChatActivity: BaseActivity(), View.OnClickListener, TextView.OnEditorActio
     override fun onClick(v: View?) {
         when (v) {
             btnHelp -> {
+                mIsSeeker = false
                 transitionToTextInput()
-                mAdapter.add(ChatModel.me("ID_SEEK", getString(R.string.here_to_help), Date()))
+                mAdapter.add(ChatModel.me("ID_HELP", getString(R.string.here_to_help), Date()))
                 mHandler.postDelayed({
                     runOnUiThread {
-                        mAdapter.add(ChatModel.other("ID_SEEK_1", getString(R.string.seek_question), DateUtil.plusSecond(1)))
+                        mAdapter.add(ChatModel.other("ID_HELP_1", getString(R.string.help_question), DateUtil.plusSecond(1)))
                         mQuestionInputMode = true
                     }
                 }, 500)
             }
             btnSeek -> {
+                mIsSeeker = true
                 transitionToTextInput()
-                mAdapter.add(ChatModel.me("ID_HELP", getString(R.string.here_to_chat), Date()))
+                mAdapter.add(ChatModel.me("ID_SEEK", getString(R.string.here_to_chat), Date()))
                 mHandler.postDelayed({
                     runOnUiThread {
-                        mAdapter.add(ChatModel.other("ID_HELP_1", getString(R.string.help_question), DateUtil.plusSecond(1)))
+                        mAdapter.add(ChatModel.other("ID_SEEK_1", getString(R.string.seek_question), DateUtil.plusSecond(1)))
                         mQuestionInputMode = true
                     }
                 }, 500)

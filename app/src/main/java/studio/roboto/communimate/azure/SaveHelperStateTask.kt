@@ -4,6 +4,7 @@ import android.os.AsyncTask
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import studio.roboto.communimate.azure.azure_entities.HelperEntity
 import studio.roboto.communimate.azure.retrofit_models.requests.KeyPhrasesRequestModel
 import studio.roboto.communimate.azure.retrofit_models.responses.KeyPhrasesResponseModel
 
@@ -35,27 +36,17 @@ class SaveHelperStateTask : AsyncTask<Unit, Unit, Unit> {
 
     fun saveHelperState(helperUserId: String, phrase: String) {
 
-        WebAPI
+        val response = WebAPI
                 .getKeyPhrasesAPI()
                 .keyPhrases(KeyPhrasesRequestModel.fromPhrase(phrase))
-                .enqueue(object : Callback<KeyPhrasesResponseModel> {
-
-                    override fun onFailure(call: Call<KeyPhrasesResponseModel>?, t: Throwable?) {
-                    }
-
-                    override fun onResponse(call: Call<KeyPhrasesResponseModel>?,
-                                            response: Response<KeyPhrasesResponseModel>?) {
-
-                        val keywordsArray = response!!.body()!!.documents!!.first().keyPhrases
-
-                        val keywordsString = keywordsArray!!.reduce { s1, s2 -> "$s1,$s2" }
-
-                        saveKeywordsToAzureTables(helperUserId, keywordsString)
-                    }
-                })
+                .execute()
+        val keywordsArray = response!!.body()!!.documents!!.first().keyPhrases
+        val keywordsString = keywordsArray!!.reduce { s1, s2 -> "$s1,$s2" }
+        saveKeywordsToAzureTables(helperUserId, keywordsString)
     }
 
     private fun saveKeywordsToAzureTables(helperUserId: String, keywordsString: String) {
+
         InsertHelperEntityTask(object : InsertHelperEntityTask.InsertHelperEntityTaskListener {
 
             override fun success() {
@@ -65,7 +56,11 @@ class SaveHelperStateTask : AsyncTask<Unit, Unit, Unit> {
             override fun failure() {
                 isSuccess = false
             }
-        })
+        }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, HelperEntity(helperUserId, keywordsString))
+
+//        InsertHelperEntityTask()
+
+        //execute(HelperEntity(helperUserId, keywordsString))
     }
 
     //region SaveHelperStateTaskListener

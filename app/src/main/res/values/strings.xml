@@ -9,7 +9,7 @@
     <string name="here_to_chat">Here to chat</string>
     <string name="here_to_help">Here to help</string>
     <string name="send">Send</string>
-    <string name="help_question">What do you need help with?</string>
-    <string name="seek_question">That\'s great, give me a quick rundown of what you\'re good at?</string>
+    <string name="seek_question">What do you need help with?</string>
+    <string name="help_question">That\'s great, give me a quick rundown of what you\'re good at?</string>
     <string name="please_wait_finding_chat_partner">Please wait, we\'re finding someone who needs your help!</string>
 </resources>

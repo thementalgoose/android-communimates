@@ -23,8 +23,6 @@ class FindMatchForSeekerTask : AsyncTask<Unit, Unit, Unit> {
     override fun doInBackground(vararg p0: Unit?) {
 
         getSeekerPhraseKeywords(seekerPhrase)
-
-        WebAPI.getSearchAPI()
     }
 
     override fun onPostExecute(result: Unit?) {
@@ -36,43 +34,29 @@ class FindMatchForSeekerTask : AsyncTask<Unit, Unit, Unit> {
     }
 
     fun getSeekerPhraseKeywords(seekerPhrase: String) {
-        WebAPI
-                .getKeyPhrasesAPI()
+        val response = WebAPI.getKeyPhrasesAPI()
                 .keyPhrases(KeyPhrasesRequestModel.fromPhrase(seekerPhrase))
-                .enqueue(object : Callback<KeyPhrasesResponseModel> {
+                .execute()
 
-                    override fun onFailure(call: Call<KeyPhrasesResponseModel>?, t: Throwable?) {
-                    }
-
-                    override fun onResponse(call: Call<KeyPhrasesResponseModel>?,
-                                            response: Response<KeyPhrasesResponseModel>?) {
-
-                        val keywordsArray = response!!.body()!!.documents!!.first().keyPhrases
-
-                        val keywordsString = keywordsArray!!.reduce { s1, s2 -> "$s1,$s2" }
-
-                        searchForKeywordsFromHelpers(keywordsString)
-                    }
-                })
+        val keywordsArray = response!!.body()!!.documents!!.first().keyPhrases
+        val keywordsString = keywordsArray!!.reduce { s1, s2 -> "$s1,$s2" }
+        searchForKeywordsFromHelpers(keywordsString)
     }
 
     fun searchForKeywordsFromHelpers(seekerKeywordsString: String) {
-        WebAPI
+        val response = WebAPI
                 .getSearchAPI()
                 .search(seekerKeywordsString)
-                .enqueue(object : Callback<SearchResponseModel> {
-                    override fun onResponse(call: Call<SearchResponseModel>?, response: Response<SearchResponseModel>?) {
-                        helperUserId = response!!.body()!!.results!!.first().userId!!
-                    }
-
-                    override fun onFailure(call: Call<SearchResponseModel>?, t: Throwable?) {
-                    }
-                })
+                .execute()
+        val results = response?.body()?.results
+        if (results != null && results.size > 0) {
+            helperUserId = results.first().userId
+        }
     }
 
     //region FindMatchForSeekerTaskListener
     interface FindMatchForSeekerTaskListener {
-        fun success(helperUserId: String)
+        fun success(helperUserId: String?)
 
         fun failure()
     }
